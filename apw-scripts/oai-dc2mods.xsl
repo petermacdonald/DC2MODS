@@ -4,7 +4,7 @@
     xmlns:sru_dc="info:srw/schema/1/dc-schema"
     xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
     xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.loc.gov/mods/v3"
-    xmlns:dhi="http://www.dhinitiative.org/"
+    xmlns:dhi="http://dhinitiative.org/dhi/"
     xsi:schemaLocation="http://www.bepress.com/OAI/2.0/qualified-dublin-core/ 
     http://www.bepress.com/assets/xsd/oai_qualified_dc.xsd"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" exclude-result-prefixes="sru_dc oai_dc dc"
@@ -147,9 +147,11 @@ in the CV such as add a code or to change the value name or to add a special sub
 
                     <!-- Start of local HARDCODED MODS elements -->
 
-                    <note displayLabel="Digital Publisher">Digital resource provided by the Hamilton
-                        College Library, Clinton, New York</note>
+                    <note displayLabel="Digital Publisher">Digital resource provided by the Digital
+                        Humanities Initiative, http://dhinitiative.org.</note>
 
+                    <!-- BEINECKE relatedItem
+                        
                     <relatedItem displayLabel="Collection Name">
                         <titleInfo>
                             <title>Beinecke Lesser Antilles Collection</title>
@@ -164,6 +166,41 @@ in the CV such as add a code or to change the value name or to add a special sub
                         </name>
                     </relatedItem>
 
+                    <accessCondition displayLabel="Copyright Status">This material is in the public domain.</accessCondition>
+                    <accessCondition displayLabel="Restriction on Access" type="restriction on access">There are no restrictions on access to these materials.</accessCondition>
+                    <accessCondition displayLabel="Use and Reproduction" type="use and reproduction">This resource is made available free for educational purposes only. For more information on access,
+                        use and reproduction of this resource contact the Special Collection Department of Hamilton College.</accessCondition>
+                    
+                    <recordInfo>
+                        <recordContentSource>Hamilton College Library</recordContentSource>
+                        <recordCreationDate encoding="w3cdtf">2013</recordCreationDate>
+                    </recordInfo>
+-->
+
+                    <relatedItem displayLabel="Collection Name">
+                        <titleInfo>
+                            <title>American Prison Writers Archive</title>
+                        </titleInfo>
+                        <location displayLabel="Collection URL">
+                            <url>http://apw.dhinitiative.org/</url>
+                        </location>
+                        <name displayLabel="Project Director" type="personal">
+                            <namePart>Larson, Doran</namePart>
+                            <affiliation>Hamilton College, Clinton, New York</affiliation>
+                            <description>Professor, English and Creative Writing, Hamilton College,
+                                Clinton, New York</description>
+                        </name>
+                    </relatedItem>
+
+                    <relatedItem displayLabel="Sponsoring Agency">
+                        <titleInfo>
+                            <title>Digital Humanities Initiative</title>
+                        </titleInfo>
+                        <location displayLabel="Collection URL">
+                            <url>http://dhinitiative.org/</url>
+                        </location>
+                    </relatedItem>
+
                     <!-- the following lines can be enabled if the data is not in the metadata source -->
                     <!--
                         <accessCondition displayLabel="Copyright Status">This material is in the public domain.</accessCondition>
@@ -171,7 +208,8 @@ in the CV such as add a code or to change the value name or to add a special sub
                     <accessCondition displayLabel="Use and Reproduction" type="use and reproduction"
                         >This resource is made available free for educational purposes only. For
                         more information on access, use and reproduction of this resource contact
-                        the Special Collection Department of Hamilton College.</accessCondition>
+                        the Digital Humanities Initiative,
+                        http://dhinitiative.org/.</accessCondition>
 
                     <recordInfo>
                         <recordContentSource>Hamilton College Library</recordContentSource>
@@ -225,6 +263,7 @@ in the CV such as add a code or to change the value name or to add a special sub
                 </xsl:for-each>
             </physicalDescription>
         </xsl:if>
+
         <originInfo>
             <xsl:attribute name="displayLabel">
                 <xsl:text>Origin Information</xsl:text>
@@ -275,25 +314,16 @@ in the CV such as add a code or to change the value name or to add a special sub
         </xsl:for-each>
 
         <xsl:if test="dc:subject">
-            <subject>
-                <xsl:if test="contains(text(), '|')">
-                    <xsl:attribute name="displayLabel">
-                        <xsl:value-of
-                            select="translate(normalize-space(substring-after(text(), '|')), '_', ' ')"
-                        />
-                    </xsl:attribute>
+            <xsl:for-each select="dc:subject">
+                <!-- look for all keywords/tags -->
+                <xsl:if test="contains(text(), 'Tags') or contains(., 'tags')">
+                    <xsl:call-template name="tokenize-subjects-keywords"/>
                 </xsl:if>
-                <xsl:for-each select="dc:subject">
-                    <!-- look for all keywords/tags -->
-                    <xsl:if test="contains(text(), 'Tags') or contains(., 'tags')">
-                        <xsl:call-template name="tokenize-subjects-keywords"/>
-                    </xsl:if>
-                    <!-- look for all lcsh Subject Headings -->
-                    <xsl:if test="contains(text(), 'ubject') or contains(., 'lcsh')">
-                        <xsl:call-template name="tokenize-subjects-lcsh"/>
-                    </xsl:if>
-                </xsl:for-each>
-            </subject>
+                <!-- look for all lcsh Subject Headings -->
+                <xsl:if test="contains(text(), 'ubject') or contains(., 'lcsh')">
+                    <xsl:call-template name="tokenize-subjects-lcsh"/>
+                </xsl:if>
+            </xsl:for-each>
         </xsl:if>
 
         <!-- look for all LC Subject Headings -->
@@ -348,6 +378,17 @@ in the CV such as add a code or to change the value name or to add a special sub
             </xsl:choose>
         </xsl:if>
 -->
+        <xsl:if test="dc:valid">
+            <extension>
+                <dhi:dhi xmlns:dhi="http://dhinitiative.org/dhi/">
+                    <xsl:for-each select="dc:valid">
+                        <xsl:call-template name="tokenize-extension"/>
+                    </xsl:for-each>
+                </dhi:dhi>
+            </extension>
+        </xsl:if>
+
+
         <xsl:if test="dc:coverage">
             <subject>
                 <xsl:choose>
@@ -375,10 +416,10 @@ in the CV such as add a code or to change the value name or to add a special sub
             <xsl:apply-templates select="."/>
         </xsl:for-each>
 
-        <xsl:for-each select="dc:valid">
+        <!--         <xsl:for-each select="dc:valid">
             <xsl:apply-templates select="."/>
         </xsl:for-each>
-
+ -->
         <xsl:for-each select="dc:identifier">
             <xsl:apply-templates select="."/>
         </xsl:for-each>
@@ -582,20 +623,18 @@ in the CV such as add a code or to change the value name or to add a special sub
             </xsl:when>
 
             <!-- ####### START OF MODS:EXTENSION ######## -->
-            <!--            <xsl:when
-                test="contains(text(), '|custom') or contains(., '|Custom') or contains(., '|Extension') or contains(., '|extension')">
+            <!--
+                <xsl:when test="contains(text(), '|custom') or contains(., '|Custom') or contains(., '|Extension_') or contains(., '|extension_')">
                 <extension>
                     <xsl:attribute name="displayLabel">
                         <xsl:text>Custom Fields</xsl:text>
                     </xsl:attribute>
-                    <xsl:if
-                        test="contains(text(), '|custom') or contains(., '|Custom') or contains(., '|Extension') or contains(., '|extension')">
-                        <xsl:call-template name="tokenize-extension"/>
-                    </xsl:if>
+                    <xsl:call-template name="tokenize-extension"/>
                 </extension>
             </xsl:when>
--->
+            -->
             <!-- ####### END OF MODS:EXTENSION ######## -->
+
             <xsl:otherwise>
                 <note type="other">
                     <xsl:if test="contains(text(), '|')">
@@ -611,16 +650,6 @@ in the CV such as add a code or to change the value name or to add a special sub
                 </note>
             </xsl:otherwise>
         </xsl:choose>
-    </xsl:template>
-
-    <xsl:template match="dc:valid">
-        <xsl:param name="string" select="concat(normalize-space(.),';')"/>
-        <extension>
-            <xsl:attribute name="displayLabel">
-                <xsl:text>Custom Fields</xsl:text>
-            </xsl:attribute>
-            <xsl:call-template name="tokenize-extension"/>
-        </extension>
     </xsl:template>
 
     <xsl:template match="dc:coverage">
@@ -1239,6 +1268,9 @@ Need to find a way to not need this single kludge, pjm -->
                             />
                         </roleTerm>
                         <roleTerm>
+                            <xsl:attribute name="type">
+                                <xsl:text>code</xsl:text>
+                            </xsl:attribute>
                             <xsl:attribute name="authority">
                                 <xsl:text>marcrelator</xsl:text>
                             </xsl:attribute>
@@ -1270,9 +1302,6 @@ Need to find a way to not need this single kludge, pjm -->
                             />
                         </roleTerm>
                         <roleTerm>
-                            <xsl:attribute name="type">
-                                <xsl:text>code</xsl:text>
-                            </xsl:attribute>
                             <xsl:attribute name="authority">
                                 <xsl:text>marcrelator</xsl:text>
                             </xsl:attribute>
@@ -1434,22 +1463,36 @@ Need to find a way to not need this single kludge, pjm -->
 
     <xsl:template name="tokenize-date">
         <xsl:param name="string" select="concat(normalize-space(.),';')"/>
-
-        <xsl:choose>
+        <xsl:variable name="newElementName">
+            <xsl:value-of select="normalize-space(substring-after(., '|'))"/>
+        </xsl:variable>
+        <!--        <xsl:choose>
             <xsl:when test="contains($string,'ISO')">
-                <date>
+-->
+        <xsl:choose>
+            <xsl:when
+                test="contains(., 'reated') or contains(., 'ssued') or contains(., 'aptured') or contains(., 'alid') or contains(., 'odified')">
+                <xsl:element name="date{$newElementName}">
                     <xsl:attribute name="encoding">
                         <xsl:text>iso8601</xsl:text>
                     </xsl:attribute>
                     <xsl:value-of select="substring-before(normalize-space($string),'|')"/>
-                </date>
+                </xsl:element>
             </xsl:when>
             <xsl:otherwise>
-                <date>
+                <dateOther>
                     <xsl:value-of select="substring-before(normalize-space($string),'|')"/>
-                </date>
+                </dateOther>
             </xsl:otherwise>
         </xsl:choose>
+        <!--            </xsl:when>
+            <xsl:otherwise>
+                <dateOther>
+                    <xsl:value-of select="substring-before(normalize-space($string),'|')"/>
+                </dateOther>
+            </xsl:otherwise>
+        </xsl:choose>
+            -->
 
         <xsl:if test="string-length(normalize-space(substring-after($string, $delimiter))) > 2">
             <xsl:call-template name="tokenize-date">
@@ -1467,12 +1510,21 @@ Need to find a way to not need this single kludge, pjm -->
     <!-- add a way to prevent "India" as a dc:subject from matching "Indiana" in the CV -->
     <xsl:template name="tokenize-subjects-lcsh">
         <xsl:param name="string" select="concat(normalize-space(.),';')"/>
-        <topic>
-            <xsl:attribute name="authority">
-                <xsl:text>lcsh</xsl:text>
-            </xsl:attribute>
-            <xsl:value-of select="substring-before(normalize-space($string),'|')"/>
-        </topic>
+        <subject>
+            <xsl:if test="contains(text(), '|')">
+                <xsl:attribute name="displayLabel">
+                    <xsl:value-of
+                        select="translate(normalize-space(substring-after(text(), '|')), '_', ' ')"
+                    />
+                </xsl:attribute>
+            </xsl:if>
+            <topic>
+                <xsl:attribute name="authority">
+                    <xsl:text>lcsh</xsl:text>
+                </xsl:attribute>
+                <xsl:value-of select="substring-before(normalize-space($string),'|')"/>
+            </topic>
+        </subject>
 
         <xsl:if test="string-length(normalize-space(substring-after($string, $delimiter))) > 2">
             <xsl:call-template name="tokenize-subjects-lcsh">
@@ -1487,10 +1539,11 @@ Need to find a way to not need this single kludge, pjm -->
 
     <xsl:template name="tokenize-subjects-keywords">
         <xsl:param name="string" select="concat(normalize-space(.),';')"/>
-        <topic>
-            <xsl:value-of select="substring-before(normalize-space($string),'|')"/>
-        </topic>
-
+        <subject>
+            <topic>
+                <xsl:value-of select="substring-before(normalize-space($string),'|')"/>
+            </topic>
+        </subject>
         <xsl:if test="string-length(normalize-space(substring-after($string, $delimiter))) > 2">
             <xsl:call-template name="tokenize-subjects-keywords">
                 <xsl:with-param name="string" select="substring-after($string, $delimiter)"/>
@@ -1500,18 +1553,18 @@ Need to find a way to not need this single kludge, pjm -->
 
     </xsl:template>
 
-    <!-- ######## EXTENSION $$########### -->
+    <!-- ######## EXTENSION ########### -->
     <xsl:template name="tokenize-extension">
         <xsl:param name="string" select="concat(normalize-space(.),';')"/>
         <xsl:variable name="newElementName">
             <xsl:value-of
-                select="translate(normalize-space(substring-after($string, '|')), ';', '')"/>
+                select="translate(normalize-space(substring-after($string, '_')), ';', '')"/>
         </xsl:variable>
         <xsl:element name="dhi:{$newElementName}">
             <xsl:attribute name="displayLabel">
                 <xsl:value-of select="$newElementName"/>
             </xsl:attribute>
-            <xsl:value-of select="normalize-space(substring-before(text(), '|'))"/>
+            <xsl:value-of select="substring-before(normalize-space($string),'|')"/>
         </xsl:element>
 
         <xsl:if test="string-length(normalize-space(substring-after($string, $delimiter))) > 2">
@@ -1562,14 +1615,11 @@ Need to find a way to not need this single kludge, pjm -->
                     <titleInfo>
                         <title>
                             <xsl:value-of select="normalize-space($relationTitle)"/>
-                        </title>
-                    </titleInfo>
-                    <location>
-                        <url>
+                            <xsl:text>-</xsl:text>
                             <xsl:value-of
                                 select="normalize-space(substring-before($relationUrl, '|'))"/>
-                        </url>
-                    </location>
+                        </title>
+                    </titleInfo>
                 </relatedItem>
             </xsl:otherwise>
         </xsl:choose>
